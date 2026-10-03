@@ -40,7 +40,9 @@ services:
       - ./models:/app/models
       - ./data:/app/data
     depends_on:
-      - mlflow
+      mlflow:
+        condition: service_healthy
+    restart: unless-stopped
     environment:
       - MODEL_PATH=/app/models/churn_model.pkl
       - MLFLOW_TRACKING_URI=http://mlflow:5000
@@ -49,10 +51,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 60s
 
   mlflow:
     image: python:3.11-slim
     container_name: mlflow
+    restart: unless-stopped
     ports:
       - "5000:5000"
     volumes:
